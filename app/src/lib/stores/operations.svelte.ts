@@ -10,6 +10,7 @@ class OperationsStore {
 	latestEvent = $state<RealtimeEvent | null>(null);
 	admin = $state<AuthSession['user'] | null>(api.hasSession() ? { username: 'admin', role: 'admin' } : null);
 	private disconnect: (() => void) | null = null;
+	private pollTimer: ReturnType<typeof setInterval> | null = null;
 
 	async refresh(): Promise<void> {
 		try {
@@ -31,6 +32,10 @@ class OperationsStore {
 	start(): void {
 		void this.refresh();
 		this.connectRealtime();
+		// Poll every 10 s as a fallback for when WebSocket is unavailable (no admin token).
+		if (!this.pollTimer) {
+			this.pollTimer = setInterval(() => { void this.refresh(); }, 10_000);
+		}
 	}
 
 	private connectRealtime(): void {
@@ -67,6 +72,10 @@ class OperationsStore {
 	stop(): void {
 		this.disconnect?.();
 		this.disconnect = null;
+		if (this.pollTimer) {
+			clearInterval(this.pollTimer);
+			this.pollTimer = null;
+		}
 	}
 }
 

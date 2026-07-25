@@ -4,6 +4,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import TopNav from '$lib/components/layout/TopNav.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
+	import Chatbot from '$lib/components/layout/Chatbot.svelte';
 	import { operations } from '$lib/stores/operations.svelte';
 
 	let { children } = $props();
@@ -16,3 +17,4 @@
 <TopNav />
 <Sidebar collapsed={sidebarCollapsed} onToggle={() => (sidebarCollapsed = !sidebarCollapsed)} />
 <main id="main-content" class:collapsed={sidebarCollapsed}>{@render children()}</main>
+<Chatbot />

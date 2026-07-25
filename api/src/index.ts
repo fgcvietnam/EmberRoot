@@ -12,6 +12,11 @@ type JsonRecord = Record<string, unknown>;
 
 const app = new Hono<AppEnv>();
 
+// Sliding-window rate limiter: 6 requests per minute per IP.
+const chatRateLimit = new Map<string, number[]>();
+const CHAT_LIMIT = 6;
+const CHAT_WINDOW_MS = 60_000;
+
 function jsonError(message: string, status = 400) {
 	return { success: false, error: message, status };
 }
@@ -174,7 +179,90 @@ app.post('/api/admin/nodes', requireAdmin, async (c) => {
 	return c.json({ success: true, data: { id: body.id } }, 201);
 });
 
+app.post('/api/chat', async (c) => {
+	const body = await parseJson(c.req.raw);
+	const messages = Array.isArray(body?.messages) ? body.messages as { role: string; content: string }[] : null;
+	const userMessage = messages?.findLast((m) => m.role === 'user')?.content ?? '';
+	if (!userMessage) return c.json(jsonError('messages array with a user message is required', 400), 400);
+
+	// Rate limit: 6 messages per 60 s per IP
+	const ip = c.req.header('CF-Connecting-IP') ?? c.req.header('X-Forwarded-For') ?? 'local';
+	const now = Date.now();
+	const hits = (chatRateLimit.get(ip) ?? []).filter((t) => now - t < CHAT_WINDOW_MS);
+	if (hits.length >= CHAT_LIMIT) {
+		const retryAfter = Math.ceil((hits[0] + CHAT_WINDOW_MS - now) / 1000);
+		c.header('Retry-After', String(retryAfter));
+		return c.json(jsonError(`Rate limit reached — ${CHAT_LIMIT} messages per minute. Retry in ${retryAfter}s.`, 429), 429);
+	}
+	hits.push(now);
+	chatRateLimit.set(ip, hits);
+
+	const apiKey = c.env.OPENAI_API_KEY;
+	if (!apiKey) return c.json(jsonError('OpenAI API key not configured', 503), 503);
+
+	// Pull recent telemetry + open alerts from D1 for context
+	const [telemetryResult, alertsResult] = await Promise.all([
+		c.env.DB.prepare(
+			`SELECT node_id, received_at, temp_5, temp_15, moisture, co, co2, ambient_temp, ambient_rh, battery_pct, signal_rssi
+			 FROM telemetry ORDER BY received_at DESC LIMIT 10`
+		).all(),
+		c.env.DB.prepare(
+			`SELECT alerts.node_id, alerts.level, alerts.explanation, alerts.created_at
+			 FROM alerts WHERE alerts.state IN ('open', 'investigating') ORDER BY alerts.created_at DESC LIMIT 5`
+		).all(),
+	]);
+
+	const telemetrySummary = telemetryResult.results.length
+		? JSON.stringify(telemetryResult.results, null, 2)
+		: 'No telemetry data available yet.';
+	const alertsSummary = alertsResult.results.length
+		? JSON.stringify(alertsResult.results, null, 2)
+		: 'No active alerts.';
+
+	const systemPrompt = `You are EmberRoot AI, an assistant for a wildfire early-detection monitoring system deployed in peatland forests. You help operators understand sensor data and make informed decisions.
+
+Sensor schema reference:
+- temp_5 / temp_15 / temp_30 / temp_45: soil temperature at 5/15/30/45 cm depths (°C). Normal peatland: 25–35°C. >45°C is critical.
+- moisture: soil volumetric moisture (%). Dry peatland fire risk when <25%.
+- co: carbon monoxide (ppm). Elevated >3 ppm is suspicious, >5 ppm is dangerous.
+- co2: carbon dioxide (ppm). Normal ambient ~400 ppm.
+- ambient_temp: air temperature (°C).
+- ambient_rh: relative humidity (%).
+- battery_pct: node battery percentage.
+- signal_rssi: radio signal strength (dBm).
+
+Current sensor data (last 10 readings):
+${telemetrySummary}
+
+Active alerts:
+${alertsSummary}
+
+Keep answers concise and actionable. If asked about data not in context, say so clearly.`;
+
+	const openaiMessages = [
+		{ role: 'system', content: systemPrompt },
+		...(messages ?? []).filter((m) => m.role === 'user' || m.role === 'assistant'),
+	];
+
+	const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+		body: JSON.stringify({ model: 'gpt-4o-mini', messages: openaiMessages, max_tokens: 512, temperature: 0.4 }),
+	});
+
+	if (!openaiRes.ok) {
+		const errText = await openaiRes.text();
+		console.error('OpenAI API error:', errText);
+		return c.json(jsonError('LLM request failed', 502), 502);
+	}
+
+	const openaiData = await openaiRes.json() as { choices?: { message?: { content?: string } }[] };
+	const reply = openaiData.choices?.[0]?.message?.content ?? 'No response generated.';
+	return c.json({ success: true, data: { reply } });
+});
+
 app.notFound((c) => c.json(jsonError('Route not found', 404), 404));
+
 
 export { RealtimeHub };
 export default {

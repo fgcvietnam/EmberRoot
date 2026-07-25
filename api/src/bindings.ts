@@ -8,6 +8,7 @@ export interface Bindings {
 	ADMIN_USERNAME?: string;
 	ADMIN_PASSWORD?: string;
 	INGEST_API_KEY?: string;
+	OPENAI_API_KEY?: string;
 }
 
 export interface AdminSession {
