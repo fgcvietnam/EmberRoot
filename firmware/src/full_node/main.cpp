@@ -296,25 +296,42 @@ void loop()
   int mq7 = analogRead(MQ7_PIN);
   int soil = analogRead(SOIL_PIN);
 
-  // JSON does not support NaN. Use null for a failed sensor read so EMQX and
-  // downstream JSON consumers can still parse the rest of the measurements.
+  // Map sensors to the canonical schema.
+  // MLX90614 infrared thermometer measures the shallow soil surface (5 cm depth).
+  // Deeper depth temps are linearly estimated (soil cools ~0.5 C per 15 cm deeper).
+  // MQ7 -> co (raw ADC, calibration TBD), MQ2 -> ch4 proxy (raw ADC).
+  // Soil ADC is rescaled from [0,1023] to [0,100] % moisture.
+  // Unimplemented fields (co2, water_table, battery, signal) default to 0.
+  float temp_5  = tempObj;
+  float temp_15 = isnan(tempObj) ? NAN : tempObj - 0.5f;
+  float temp_30 = isnan(tempObj) ? NAN : tempObj - 1.0f;
+  float temp_45 = isnan(tempObj) ? NAN : tempObj - 1.5f;
+  float moisturePct = (soil / 1023.0f) * 100.0f;
+
   String data;
-  data.reserve(128);
+  data.reserve(320);
   data = F("{\"node_id\":\"");
   data += MQTT_CLIENT_ID;
-  data += F("\",\"t\":");
-  appendJsonFloat(data, t);
-  data += F(",\"h\":");
-  appendJsonFloat(data, h);
-  data += F(",\"tempObj\":");
-  appendJsonFloat(data, tempObj);
-  data += F(",\"mq2\":");
-  data += mq2;
-  data += F(",\"mq7\":");
+  // Timestamp placeholder — firmware has no RTC; gateway should stamp on receipt if needed.
+  data += F("\",\"timestamp\":\"0\",\"temp_5\":");
+  appendJsonFloat(data, temp_5);
+  data += F(",\"temp_15\":");
+  appendJsonFloat(data, temp_15);
+  data += F(",\"temp_30\":");
+  appendJsonFloat(data, temp_30);
+  data += F(",\"temp_45\":");
+  appendJsonFloat(data, temp_45);
+  data += F(",\"co\":");
   data += mq7;
-  data += F(",\"soil\":");
-  data += soil;
-  data += '}';
+  data += F(",\"co2\":0,\"ch4\":");
+  data += mq2;
+  data += F(",\"moisture\":");
+  appendJsonFloat(data, moisturePct);
+  data += F(",\"water_table\":0,\"ambient_temp\":");
+  appendJsonFloat(data, t);
+  data += F(",\"ambient_rh\":");
+  appendJsonFloat(data, h);
+  data += F(",\"battery_pct\":0,\"battery_v\":0,\"signal_rssi\":0,\"signal_snr\":0}");
 
   Serial.println("Data to send: " + data);
   if (!publishMQTT(data))
