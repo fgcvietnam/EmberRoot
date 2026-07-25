@@ -19,7 +19,7 @@
 
 {#if visible && items.length > 0}
 	<div
-		class="ct"
+		class="absolute z-[300] pointer-events-none bg-[#0a0e14]/97 border border-white/10 rounded-md px-[10px] py-2 min-w-[128px] max-w-[220px] shadow-[0_8px_32px_rgba(0,0,0,0.7),0_0_0_1px_rgba(240,120,64,0.08)] backdrop-blur-[12px]"
 		style="
 			left: {align === 'right' ? x - 14 : x + 14}px;
 			top: {y}px;
@@ -28,70 +28,21 @@
 		role="tooltip"
 	>
 		{#if title}
-			<div class="ct__title">{title}</div>
+			<div class="font-mono text-[9px] tracking-[0.04em] text-text-muted mb-[6px] pb-[5px] border-b border-white/[0.08] whitespace-nowrap">{title}</div>
 		{/if}
-		{#each items as item}
-			<div class="ct__row">
+		{#each items as item, idx}
+			<div class="flex items-center gap-[6px] {idx > 0 ? 'mt-1' : ''}">
 				{#if item.color}
-					<span class="ct__swatch" style="background:{item.color}"></span>
+					<span class="w-2 h-2 rounded-[2px] shrink-0" style="background:{item.color}"></span>
 				{/if}
-				<div class="ct__content">
-					<span class="ct__label">{item.label}</span>
-					<span class="ct__value">{item.value}</span>
+				<div class="flex justify-between items-baseline gap-2 flex-1 min-w-0">
+					<span class="text-[10px] text-text-secondary truncate">{item.label}</span>
+					<span class="font-mono text-[11px] font-semibold text-text-primary whitespace-nowrap shrink-0">{item.value}</span>
 				</div>
 			</div>
 			{#if item.sub}
-				<div class="ct__sub">{item.sub}</div>
+				<div class="text-[9px] text-text-muted ml-[14px] mt-[1px] italic">{item.sub}</div>
 			{/if}
 		{/each}
 	</div>
 {/if}
-
-<style>
-	.ct {
-		position: absolute;
-		z-index: 300;
-		pointer-events: none;
-		background: rgba(10, 14, 20, 0.97);
-		border: 1px solid rgba(255,255,255,0.1);
-		border-radius: 6px;
-		padding: 8px 10px;
-		min-width: 128px;
-		max-width: 220px;
-		box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(240,120,64,0.08);
-		backdrop-filter: blur(12px);
-	}
-	.ct__title {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 9px; letter-spacing: 0.04em;
-		color: var(--text-muted);
-		margin-bottom: 6px; padding-bottom: 5px;
-		border-bottom: 1px solid rgba(255,255,255,0.08);
-		white-space: nowrap;
-	}
-	.ct__row {
-		display: flex; align-items: center; gap: 6px;
-		margin-top: 4px;
-	}
-	.ct__row:first-of-type { margin-top: 0; }
-	.ct__swatch {
-		width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0;
-	}
-	.ct__content {
-		display: flex; justify-content: space-between; align-items: baseline;
-		gap: 8px; flex: 1; min-width: 0;
-	}
-	.ct__label {
-		font-size: 10px; color: var(--text-secondary);
-		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-	}
-	.ct__value {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 11px; font-weight: 600; color: var(--text-primary);
-		white-space: nowrap; flex-shrink: 0;
-	}
-	.ct__sub {
-		font-size: 9px; color: var(--text-muted);
-		margin-left: 14px; margin-top: 1px; font-style: italic;
-	}
-</style>

@@ -38,20 +38,20 @@
 	const batteryHealth = $derived(telemetry ? healthTone(telemetry.batteryPct) : null);
 </script>
 
-<div class="drawer-content">
+<div class="flex flex-col gap-4">
 	{#if sensor && telemetry}
-		<div class="drawer-top">
+		<div class="flex justify-between items-center gap-3.5">
 			<div>
-				<div class="drawer-title">{sensor.name}</div>
-				<div class="drawer-subtitle">{sensor.id} • {sensor.regionId}</div>
+				<div class="text-lg font-bold">{sensor.name}</div>
+				<div class="text-[13px] text-text-muted">{sensor.id} • {sensor.regionId}</div>
 			</div>
-			<div class="drawer-score" style="color:{statusInfo?.color}">{confidence?.score ?? 0}<span>Confidence</span></div>
+			<div class="text-right" style="color:{statusInfo?.color}">{confidence?.score ?? 0}<span class="block text-[11px] text-text-muted">Confidence</span></div>
 		</div>
 
 		{#if confidence?.explanation?.length}
-			<div class="drawer-section">
-				<div class="drawer-section__title">Explainable alert rationale</div>
-				<ul>
+			<div class="bg-surface-base border border-surface-border rounded-2xl p-4">
+				<div class="font-bold mb-2.5">Explainable alert rationale</div>
+				<ul class="list-none p-0 m-0 grid gap-2">
 					{#each confidence.explanation as item}
 						<li>{item}</li>
 					{/each}
@@ -60,11 +60,11 @@
 		{/if}
 
 		{#if confidence?.factors}
-			<div class="drawer-section">
-				<div class="drawer-section__title">Signal factors</div>
-				<div class="drawer-factor-grid">
+			<div class="bg-surface-base border border-surface-border rounded-2xl p-4">
+				<div class="font-bold mb-2.5">Signal factors</div>
+				<div class="grid grid-cols-2 gap-2">
 					{#each Object.entries(confidence.factors) as [key, value]}
-						<div class="drawer-factor-pill">
+						<div class="flex justify-between items-center gap-2 px-2.5 py-2 rounded-lg bg-surface-raised border border-surface-border text-xs">
 							<span>{key}</span>
 							<strong>{value}</strong>
 						</div>
@@ -73,59 +73,59 @@
 			</div>
 		{/if}
 
-		<div class="drawer-status-row">
-			<span class="drawer-status-pill" style="color:{statusInfo?.color}; background:{statusInfo?.color}1a; border-color:{statusInfo?.color}44;">{statusInfo?.label}</span>
+		<div class="flex flex-wrap gap-2">
+			<span class="inline-flex items-center border border-current rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] uppercase" style="color:{statusInfo?.color}; background:{statusInfo?.color}1a; border-color:{statusInfo?.color}44;">{statusInfo?.label}</span>
 			{#if health}
-				<span class="drawer-status-pill" style="color:{batteryHealth?.color}; background:{batteryHealth?.color}1a; border-color:{batteryHealth?.color}44;">{batteryHealth?.label}</span>
+				<span class="inline-flex items-center border border-current rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.06em] uppercase" style="color:{batteryHealth?.color}; background:{batteryHealth?.color}1a; border-color:{batteryHealth?.color}44;">{batteryHealth?.label}</span>
 			{/if}
 		</div>
 
-		<div class="drawer-grid">
-			<div class="drawer-card">
-				<div class="drawer-card__label">Last update</div>
+		<div class="grid grid-cols-2 gap-3">
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Last update</div>
 				<div>{new Date(telemetry.timestamp).toLocaleString()}</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">Battery</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Battery</div>
 				<div>{telemetry.batteryPct}%</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">LoRa RSSI</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">LoRa RSSI</div>
 				<div>{telemetry.loraRssi} dBm</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">LoRa SNR</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">LoRa SNR</div>
 				<div>{telemetry.loraSnr} dB</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">Danger level</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Danger level</div>
 				<div>{sensor.dangerLevel}</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">Humidity</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Humidity</div>
 				<div>{telemetry.humidity.toFixed(1)}%</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">GPS</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">GPS</div>
 				<div>{sensor.location.lat.toFixed(4)}, {sensor.location.lon.toFixed(4)}</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">Elevation</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Elevation</div>
 				<div>{sensor.elevation} m</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">Firmware</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Firmware</div>
 				<div>{health?.firmwareVersion ?? sensor.firmwareVersion}</div>
 			</div>
-			<div class="drawer-card">
-				<div class="drawer-card__label">Deployed</div>
+			<div class="bg-surface-raised border border-surface-border rounded-2xl p-3.5">
+				<div class="text-[11px] text-text-muted mb-1.5">Deployed</div>
 				<div>{new Date(sensor.deployedAt).toLocaleDateString()}</div>
 			</div>
 		</div>
 
-		<div class="drawer-section">
-			<div class="drawer-section__title">Environmental readings</div>
-			<ul>
+		<div class="bg-surface-base border border-surface-border rounded-2xl p-4">
+			<div class="font-bold mb-2.5">Environmental readings</div>
+			<ul class="list-none p-0 m-0 grid gap-2">
 				<li>Temperature: {telemetry.temperature.toFixed(1)}°C</li>
 				<li>Humidity: {telemetry.humidity.toFixed(1)}%</li>
 				<li>CO₂: {Math.round(telemetry.co2Ppm)} ppm</li>
@@ -136,9 +136,9 @@
 		</div>
 
 		{#if health}
-			<div class="drawer-section">
-				<div class="drawer-section__title">Node health</div>
-				<ul>
+			<div class="bg-surface-base border border-surface-border rounded-2xl p-4">
+				<div class="font-bold mb-2.5">Node health</div>
+				<ul class="list-none p-0 m-0 grid gap-2">
 					<li>Firmware: {health.firmwareVersion}</li>
 					<li>Calibration: {health.calibrationStatus}</li>
 					<li>Drift: {health.sensorDrift.toFixed(2)}</li>
@@ -150,7 +150,7 @@
 
 		<a
 			href="/spatial-map/node/{sensor.id}"
-			class="analytics-btn"
+			class="group flex items-center justify-center gap-2 px-[18px] py-[13px] rounded-[14px] bg-gradient-to-br from-[#f0783f] to-[#e05428] text-card text-sm font-bold no-underline tracking-[0.01em] shadow-[0_4px_16px_rgba(240,120,63,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] transition-[filter,transform,box-shadow] duration-180 ease-in-out hover:brightness-108 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(240,120,63,0.45),inset_0_1px_0_rgba(255,255,255,0.15)] active:translate-y-0 active:brightness-96"
 			id="btn-view-node-analytics-{sensor.id}"
 		>
 			<svg
@@ -168,7 +168,7 @@
 			</svg>
 			View Detailed Analytics
 			<svg
-				class="analytics-btn__arrow"
+				class="ml-auto opacity-85 transition-transform duration-180 ease-in-out group-hover:translate-x-0.75"
 				width="14"
 				height="14"
 				viewBox="0 0 24 24"
@@ -184,168 +184,6 @@
 			</svg>
 		</a>
 	{:else}
-		<div class="drawer-empty">Select a sensor to inspect telemetry.</div>
+		<div class="text-text-muted text-[13px]">Select a sensor to inspect telemetry.</div>
 	{/if}
 </div>
-
-<style>
-	.drawer-content {
-		display: flex;
-		flex-direction: column;
-		gap: 16px;
-	}
-
-	.drawer-top {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 14px;
-	}
-
-	.drawer-title {
-		font-size: 18px;
-		font-weight: 700;
-	}
-
-	.drawer-subtitle {
-		font-size: 13px;
-		color: var(--text-muted);
-	}
-
-	.drawer-score {
-		text-align: right;
-	}
-
-	.drawer-score span {
-		display: block;
-		font-size: 11px;
-		color: var(--text-muted);
-	}
-
-	.drawer-status-row {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-
-	.drawer-status-pill {
-		display: inline-flex;
-		align-items: center;
-		border: 1px solid;
-		border-radius: 999px;
-		padding: 4px 10px;
-		font-size: 10px;
-		font-weight: 700;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-	}
-
-	.drawer-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 12px;
-	}
-
-	.drawer-card {
-		background: var(--surface-raised);
-		border: 1px solid var(--surface-border);
-		border-radius: 16px;
-		padding: 14px;
-	}
-
-	.drawer-card__label {
-		font-size: 11px;
-		color: var(--text-muted);
-		margin-bottom: 6px;
-	}
-
-	.drawer-section {
-		background: var(--surface-base);
-		border: 1px solid var(--surface-border);
-		border-radius: 16px;
-		padding: 16px;
-	}
-
-	.drawer-section__title {
-		font-weight: 700;
-		margin-bottom: 10px;
-	}
-
-	.drawer-factor-grid {
-		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 8px;
-	}
-
-	.drawer-factor-pill {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 10px;
-		border-radius: 10px;
-		background: var(--surface-raised);
-		border: 1px solid var(--surface-border);
-		font-size: 12px;
-	}
-
-	.drawer-section ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		gap: 8px;
-	}
-
-	/* ── View Detailed Analytics button ───────────────────────────────────── */
-
-	.analytics-btn {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 8px;
-		padding: 13px 18px;
-		border-radius: 14px;
-		background: linear-gradient(135deg, #f0783f 0%, #e05428 100%);
-		color: #fff;
-		font-size: 14px;
-		font-weight: 700;
-		text-decoration: none;
-		letter-spacing: 0.01em;
-		box-shadow:
-			0 4px 16px rgba(240, 120, 63, 0.35),
-			0 1px 0 rgba(255, 255, 255, 0.12) inset;
-		transition:
-			filter 0.18s ease,
-			transform 0.14s ease,
-			box-shadow 0.18s ease;
-	}
-
-	.analytics-btn:hover {
-		filter: brightness(1.08);
-		transform: translateY(-1px);
-		box-shadow:
-			0 8px 24px rgba(240, 120, 63, 0.45),
-			0 1px 0 rgba(255, 255, 255, 0.15) inset;
-	}
-
-	.analytics-btn:active {
-		transform: translateY(0);
-		filter: brightness(0.96);
-	}
-
-	.analytics-btn__arrow {
-		margin-left: auto;
-		opacity: 0.85;
-		transition: transform 0.18s ease;
-	}
-
-	.analytics-btn:hover .analytics-btn__arrow {
-		transform: translateX(3px);
-	}
-
-	.drawer-empty {
-		color: var(--text-muted);
-		font-size: 13px;
-	}
-</style>

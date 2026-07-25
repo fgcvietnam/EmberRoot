@@ -1,7 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
-export { default as TopNav } from './components/TopNav.svelte';
-export { default as Sidebar } from './components/Sidebar.svelte';
-export { default as PageShell } from './components/PageShell.svelte';
+export { default as TopNav } from './components/layout/TopNav.svelte';
+export { default as Sidebar } from './components/layout/Sidebar.svelte';
+export { default as PageShell } from './components/layout/PageShell.svelte';
 
 // ── Design System UI components ──
 export * from './components/ui/index.js';

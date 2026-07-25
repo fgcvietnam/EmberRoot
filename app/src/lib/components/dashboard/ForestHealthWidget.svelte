@@ -1,3 +1,5 @@
+
+
 <!-- ForestHealthWidget — SparklineChart (7-day trend) + BarChart (risk factors) -->
 <script lang="ts">
 	import { mockService } from '$lib/mock';
@@ -34,26 +36,38 @@
 	const COLOR: Record<string, string> = {
 		online: 'var(--status-online)', warning: 'var(--status-warning)', critical: 'var(--status-critical)'
 	};
+
+	const iconVariantStyles: Record<string, string> = {
+		online: 'bg-[rgba(34,211,160,0.12)] border-[rgba(34,211,160,0.25)] text-status-online',
+		warning: 'bg-[rgba(240,179,64,0.12)] border-[rgba(240,179,64,0.25)] text-status-warning',
+		critical: 'bg-[rgba(240,80,80,0.12)] border-[rgba(240,80,80,0.25)] text-status-critical'
+	};
+
+	const textVariantStyles: Record<string, string> = {
+		online: 'text-status-online',
+		warning: 'text-status-warning',
+		critical: 'text-status-critical'
+	};
 </script>
 
-<div class="fh">
-	<div class="fh__header">
-		<div class="fh__icon fh__icon--{variant}">
+<div class="flex flex-col gap-[14px] h-full">
+	<div class="flex items-center gap-[10px]">
+		<div class="w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 {iconVariantStyles[variant]}">
 			<svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l14 9-14 9V3z"/>
 			</svg>
 		</div>
 		<div>
-			<div class="fh__title">Forest Health</div>
-			<div class="fh__sub">Composite risk-adjusted index</div>
+			<div class="text-[12px] font-semibold tracking-[0.06em] uppercase text-text-primary">Forest Health</div>
+			<div class="text-[10px] text-text-muted">Composite risk-adjusted index</div>
 		</div>
 	</div>
 
-	<div class="fh__score-row">
-		<span class="fh__score fh__score--{variant}">{health}</span>
+	<div class="flex items-baseline gap-2">
+		<span class="font-mono text-[42px] font-extrabold leading-none tracking-[-2px] {textVariantStyles[variant]}">{health}</span>
 		<div>
-			<div class="fh__level fh__level--{variant}">{level}</div>
-			<div class="fh__denom">/ 100</div>
+			<div class="text-[11px] font-bold uppercase tracking-[0.06em] {textVariantStyles[variant]}">{level}</div>
+			<div class="text-[11px] text-text-muted">/ 100</div>
 		</div>
 	</div>
 
@@ -65,7 +79,7 @@
 				formatValue={(n) => n.toFixed(0)}
 				formatTime={(ts) => { const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()}`; }}
 			/>
-			<p class="fh__spark-label">7-day health trend</p>
+			<p class="text-[9px] text-text-muted mt-[3px] mb-0 uppercase tracking-[0.06em]">7-day health trend</p>
 		</div>
 	{/if}
 
@@ -73,35 +87,3 @@
 		<BarChart bars={factorBars} orientation="horizontal" showValues />
 	{/if}
 </div>
-
-<style>
-	.fh { display: flex; flex-direction: column; gap: 14px; height: 100%; }
-	.fh__header { display: flex; align-items: center; gap: 10px; }
-	.fh__icon {
-		width: 32px; height: 32px; border-radius: 8px; border: 1px solid;
-		display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-	}
-	.fh__icon--online   { background: rgba(34,211,160,0.12); border-color: rgba(34,211,160,0.25); color: var(--status-online); }
-	.fh__icon--warning  { background: rgba(240,179,64,0.12); border-color: rgba(240,179,64,0.25); color: var(--status-warning); }
-	.fh__icon--critical { background: rgba(240,80,80,0.12);  border-color: rgba(240,80,80,0.25);  color: var(--status-critical); }
-	.fh__title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-primary); }
-	.fh__sub   { font-size: 10px; color: var(--text-muted); }
-
-	.fh__score-row { display: flex; align-items: baseline; gap: 8px; }
-	.fh__score {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -2px;
-	}
-	.fh__score--online   { color: var(--status-online); }
-	.fh__score--warning  { color: var(--status-warning); }
-	.fh__score--critical { color: var(--status-critical); }
-	.fh__level { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-	.fh__level--online   { color: var(--status-online); }
-	.fh__level--warning  { color: var(--status-warning); }
-	.fh__level--critical { color: var(--status-critical); }
-	.fh__denom { font-size: 11px; color: var(--text-muted); }
-	.fh__spark-label {
-		font-size: 9px; color: var(--text-muted); margin: 3px 0 0;
-		text-transform: uppercase; letter-spacing: 0.06em;
-	}
-</style>

@@ -1,313 +1,59 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { mockService, type Telemetry, type NodeHealth, type ConfidenceScore } from '$lib/mock';
-import { selectedRegionId } from '$lib/stores/regionContext';
-import PageShell from '$lib/components/PageShell.svelte';
-import SideDrawer from '$lib/components/ui/SideDrawer.svelte';
-import MapView from '$lib/components/map/MapView.svelte';
-import TelemetryDrawer from '$lib/components/map/TelemetryDrawer.svelte';
-import LayerControl from '$lib/components/map/LayerControl.svelte';
-import MapLegend from '$lib/components/map/MapLegend.svelte';
-import SearchPanel from '$lib/components/map/SearchPanel.svelte';
-import FilterBar from '$lib/components/map/FilterBar.svelte';
-
-const resolvedRegionId = $derived($selectedRegionId === 'all' ? 'RG-UMINH-01' : $selectedRegionId);
-const region = $derived(mockService.getRegion(resolvedRegionId));
-const sensors = $derived(region ? mockService.getSensorsForRegion(resolvedRegionId) : []);
-const telemetryMap = $derived(new Map<string, Telemetry | undefined>(
-	sensors.map((sensor) => [sensor.id, mockService.getTelemetry(sensor.id)])
-));
-const healthMap = $derived(new Map<string, NodeHealth | undefined>(
-	sensors.map((sensor) => [sensor.id, mockService.getNodeHealth(sensor.id)])
-));
-const confidenceMap = $derived(new Map<string, ConfidenceScore | undefined>(
-	sensors.map((sensor) => [sensor.id, mockService.getConfidenceScore(sensor.id)])
-));
-
-const initialSensorId = $derived(sensors[0]?.id ?? null);
-let selectedSensorId = $state<string | null>(null);
-let activeLayers = $state({
-	sensorNodes: true,
-	sensorConnections: false,
-	riskHeatmap: true,
-	firmsHotspots: true,
-	groundwater: false,
-	moisture: true
-});
-let searchResults = $state<{ id: string; title: string; details: string; coords: [number, number] }[]>([]);
-let mapReady = $state(false);
-let drawerOpen = $state(false);
-let filterStatus = $state<string | null>(null);
-
-const filteredSensors = $derived(
-	filterStatus === null
-		? sensors
-		: sensors.filter((s) => s.status === filterStatus)
-);
-
-const legendItems = [
-	{ label: 'Normal', color: '#22c55e' },
-	{ label: 'Monitor', color: '#f59e0b' },
-	{ label: 'Warning', color: '#ef4444' },
-	{ label: 'Offline', color: '#374151' }
-];
-
-function selectSensor(id: string) {
-	selectedSensorId = id;
-	drawerOpen = true;
-}
-
-type LayerKey = keyof typeof activeLayers;
-
-function toggleLayer(id: string) {
-	const layerId = id as LayerKey;
-	activeLayers = { ...activeLayers, [layerId]: !activeLayers[layerId] };
-}
-
-function updateMousePosition(coords: string) {
-	// expose cursor coordinates for potential map header or debug overlay
-}
-
-function runSearch(query: string) {
-	const cleaned = query.trim().toLowerCase();
-	if (!cleaned) {
-		searchResults = [];
-		return;
-	}
-
-	searchResults = sensors
-		.filter((sensor) =>
-			sensor.id.toLowerCase().includes(cleaned)
-			|| sensor.type.toLowerCase().includes(cleaned)
-			|| sensor.status.toLowerCase().includes(cleaned)
-			|| String(sensor.location.lat).includes(cleaned)
-			|| String(sensor.location.lon).includes(cleaned)
-		)
-		.slice(0, 10)
-		.map((sensor) => ({
-			id: sensor.id,
-			title: sensor.id,
-			details: `${sensor.type.toUpperCase()} • ${sensor.status}`,
-			coords: [sensor.location.lat, sensor.location.lon]
-		}));
-}
-
-function selectSearch(item: { id: string; title: string; details: string; coords: [number, number] }) {
-	selectedSensorId = item.id;
-	searchResults = [];
-	drawerOpen = true;
-}
-
-function closeDrawer() {
-	drawerOpen = false;
-	selectedSensorId = null;
-}
-
-onMount(() => {
-	mapReady = true;
-});
-
-function metricAverage<K extends keyof Telemetry>(key: K) {
-	const values = sensors
-		.map((sensor) => telemetryMap.get(sensor.id))
-		.filter((value): value is Telemetry => !!value)
-		.map((telemetry) => telemetry[key] as number);
-
-	return values.length ? (values.reduce((sum, next) => sum + next, 0) / values.length).toFixed(1) : '—';
-}
+	import { operations } from '$lib/stores/operations.svelte';
+	import { selectedRegionId } from '$lib/stores/regionContext';
+	import StatusPill from '$lib/components/feedback/StatusPill.svelte';
+	import LoadingState from '$lib/components/feedback/LoadingState.svelte';
+	const regions = $derived($selectedRegionId === 'all' ? operations.regions : operations.regions.filter((region) => region.id === $selectedRegionId));
+	const nodes = $derived($selectedRegionId === 'all' ? operations.nodes : operations.nodes.filter((node) => node.region_id === $selectedRegionId));
 </script>
 
-<svelte:head>
-<title>Spatial Map � EmberRoot</title>
-<meta name="description" content="Spatial Map � geographic deployment visualisation of U Minh Forest sensors and hotspots." />
-</svelte:head>
+<section class="max-w-[1240px] mx-auto px-11 py-10 pb-16 max-sm:px-4 max-sm:py-6 max-sm:pb-12">
+	<header class="flex justify-between gap-4 items-end mb-7 max-sm:grid max-sm:items-start">
+		<div>
+			<p class="m-0 mb-1.5 text-brand text-[0.75rem] font-extrabold tracking-[0.08em] uppercase">Coverage</p>
+			<h1 class="m-0 text-[2rem] tracking-[-0.04em]">Monitoring footprint</h1>
+			<p class="m-0 mt-1.5 text-text-muted">Coordinates registered for regions and field nodes.</p>
+		</div>
+		<span class="text-text-muted font-mono text-[0.75rem]">{nodes.filter((node)=>node.latitude !== null && node.longitude !== null).length} mapped nodes</span>
+	</header>
 
-<PageShell
-title="Spatial Map"
-subtitle="Geographic deployment visualisation and spatial analysis"
-breadcrumb={['EmberRoot', 'Spatial Map']}
->
-<div class="spatial-grid">
-<section class="map-panel">
-<div class="map-panel__header">
-<div>
-<h2>{region?.name ?? 'U Minh Forest'}</h2>
-<p>{region ? `${region.terrain.replace('_', ' ')} terrain � ${region.areaSqKm.toFixed(0)} km�` : 'Forest monitoring region'}</p>
-</div>
-<div class="map-panel__stats">
-<div><span>{sensors.length}</span><small>Total sensors</small></div>
-<div><span>{metricAverage('temperature')}�C</span><small>Avg. temperature</small></div>
-<div><span>{metricAverage('co2Ppm')}</span><small>Avg. CO2</small></div>
-<div><span>{metricAverage('batteryPct')}%</span><small>Avg. battery</small></div>
-</div>
-</div>
+	{#if operations.loading}<LoadingState />{:else}
+		<div class="grid grid-cols-[minmax(15rem,0.7fr)_1.3fr] gap-4 max-sm:grid-cols-1">
+			<section class="overflow-hidden border border-border rounded-[0.65rem] bg-card">
+				<h2 class="m-0 px-[1.15rem] py-4 border-b border-border text-[0.95rem]">Region centers</h2>
+				{#each regions as region}
+					<article class="flex justify-between gap-4 px-[1.15rem] py-4 border-t border-border first:border-t-0">
+						<div>
+							<strong class="text-[0.86rem]">{region.name}</strong>
+							<p class="m-0 mt-0.5 text-text-muted text-[0.77rem]">{region.description ?? region.code}</p>
+						</div>
+						<code class="self-center text-text-muted font-mono text-[0.67rem] text-right">{region.center_lat.toFixed(4)}, {region.center_lon.toFixed(4)}</code>
+					</article>
+				{:else}
+					<p class="px-[1.15rem] py-8 text-text-muted text-center">No region is selected.</p>
+				{/each}
+			</section>
 
-<div class="map-container">
-{#if mapReady}
-<MapView
-sensors={filteredSensors}
-selectedId={selectedSensorId}
-onSelectSensor={selectSensor}
-activeLayers={activeLayers}
-onMousePosition={updateMousePosition}
-/>
-{/if}
-
-<div class="map-overlays">
-	<FilterBar onFilter={(status) => (filterStatus = status)} />
-
-	<SearchPanel
-		results={searchResults}
-		onSearch={runSearch}
-		onSelect={selectSearch}
-	/>
-
-	<LayerControl
-		layers={[
-			{ id: 'sensorNodes', label: 'Sensor Nodes', enabled: activeLayers.sensorNodes },
-			{ id: 'riskHeatmap', label: 'Fire Risk', enabled: activeLayers.riskHeatmap },
-			{ id: 'firmsHotspots', label: 'Hotspots', enabled: activeLayers.firmsHotspots },
-			{ id: 'moisture', label: 'Moisture', enabled: activeLayers.moisture }
-		]}
-		onToggle={toggleLayer}
-	/>
-
-	<MapLegend items={legendItems} />
-</div>
-</div>
+			<section class="overflow-hidden border border-border rounded-[0.65rem] bg-card">
+				<div class="flex justify-between gap-4 px-[1.15rem] py-4 border-b border-border">
+					<h2 class="m-0 text-[0.95rem]">Node coordinates</h2>
+					<span class="text-text-muted text-[0.75rem]">Use this inventory to position field hardware.</span>
+				</div>
+				<div class="grid">
+					{#each nodes as node}
+						<a href={'/spatial-map/node/'+encodeURIComponent(node.id)}
+							class="flex justify-between gap-4 px-[1.15rem] py-4 border-t border-border first:border-t-0 text-ink no-underline hover:bg-surface-subtle">
+							<div class="grid gap-0.5">
+								<strong class="text-[0.86rem]">{node.name}</strong>
+								<small class="text-text-muted font-mono text-[0.7rem]">{node.id} · {node.latitude === null || node.longitude === null ? 'Coordinates not set' : `${node.latitude.toFixed(5)}, ${node.longitude.toFixed(5)}`}</small>
+							</div>
+							<StatusPill status={node.status}/>
+						</a>
+					{:else}
+						<p class="px-[1.15rem] py-8 text-text-muted text-center">No nodes are registered.</p>
+					{/each}
+				</div>
+			</section>
+		</div>
+	{/if}
 </section>
-
-<section class="overview-panel">
-<div class="overview-card">
-<h3>Watch metrics</h3>
-<ul>
-<li><strong>{sensors.filter((sensor) => sensor.status === 'online').length}</strong> active sensors</li>
-<li><strong>{metricAverage('temperature')}°C</strong> average temperature</li>
-<li><strong>{metricAverage('humidity')}%</strong> average humidity</li>
-<li><strong>{metricAverage('co2Ppm')}</strong> average CO₂</li>
-<li><strong>{metricAverage('smokeIndex')}</strong> average smoke index</li>
-</ul>
-</div>
-
-<SideDrawer bind:open={drawerOpen} title={selectedSensorId ? `Sensor ${selectedSensorId}` : 'Sensor details'} width="md" onclose={closeDrawer}>
-			<TelemetryDrawer
-				sensor={selectedSensorId ? mockService.getSensor(selectedSensorId) ?? null : null}
-				telemetry={selectedSensorId ? telemetryMap.get(selectedSensorId) ?? null : null}
-				health={selectedSensorId ? healthMap.get(selectedSensorId) ?? null : null}
-				confidence={selectedSensorId ? confidenceMap.get(selectedSensorId) ?? null : null}
-			/>
-		</SideDrawer>
-</section>
-</div>
-</PageShell>
-
-<style>
-.spatial-grid {
-display: grid;
-grid-template-columns: 1.7fr 1fr;
-gap: 18px;
-margin-top: 18px;
-}
-
-.map-panel {
-position: relative;
-}
-
-.map-panel__header {
-display: flex;
-justify-content: space-between;
-align-items: flex-start;
-gap: 18px;
-margin-bottom: 18px;
-}
-
-.map-panel__header h2 {
-margin: 0;
-font-size: 20px;
-}
-
-.map-panel__header p {
-margin: 6px 0 0;
-color: var(--text-muted);
-}
-
-.map-panel__stats {
-display: grid;
-grid-template-columns: repeat(4, minmax(0, 1fr));
-gap: 12px;
-}
-
-.map-panel__stats div {
-background: var(--surface-raised);
-border: 1px solid var(--surface-border);
-border-radius: 14px;
-padding: 16px;
-}
-
-.map-panel__stats span {
-display: block;
-font-weight: 700;
-font-size: 18px;
-}
-
-.map-panel__stats small {
-color: var(--text-muted);
-}
-
-.map-container {
-position: relative;
-height: calc(100vh - 160px);
-min-height: 680px;
-}
-
-.map-overlays {
-position: absolute;
-top: 18px;
-right: 18px;
-display: grid;
-gap: 12px;
-width: min(320px, calc(100% - 36px));
-z-index: 600;
-}
-
-.overview-panel {
-display: grid;
-gap: 18px;
-}
-
-.overview-card {
-background: var(--surface-base);
-border: 1px solid var(--surface-border);
-border-radius: 18px;
-padding: 20px;
-}
-
-.overview-card h3 {
-margin: 0 0 12px;
-font-size: 18px;
-}
-
-.overview-card ul {
-list-style: none;
-padding: 0;
-margin: 0;
-display: grid;
-gap: 10px;
-}
-
-.overview-card li {
-padding: 14px;
-background: var(--surface-raised);
-border-radius: 14px;
-}
-
-@media (max-width: 980px) {
-.spatial-grid {
-grid-template-columns: 1fr;
-}
-
-.map-container {
-height: 620px;
-}
-}
-</style>

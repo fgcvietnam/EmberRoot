@@ -10,3 +10,4 @@ export { default as Toolbar } from './Toolbar.svelte';
 export { default as Dropdown } from './Dropdown.svelte';
 export { default as SearchBar } from './SearchBar.svelte';
 export { default as SideDrawer } from './SideDrawer.svelte';
+export { default as MiniHeatmapCard } from './MiniHeatmapCard.svelte';

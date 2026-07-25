@@ -120,28 +120,27 @@
 	// Column labels: every 6 hours → 8 labels
 	const COL_LABELS = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
 </script>
-
-<div class="hg">
+<div class="flex flex-col gap-2 w-full">
 	{#if title}
-		<div class="hg__title">{title}</div>
+		<div class="text-[12px] font-bold text-text-secondary">{title}</div>
 	{/if}
 
-	<div class="hg__col-labels" aria-hidden="true">
-		<div class="hg__row-label-spacer"></div>
+	<div class="relative h-[14px] pl-[64px]" aria-hidden="true">
+		<div class="inline-block"></div>
 		{#each COL_LABELS as label, i}
-			<div class="hg__col-label" style="left:{(i / 8 * 100).toFixed(1)}%">{label}</div>
+			<div class="absolute text-[9px] text-text-muted -translate-x-1/2 whitespace-nowrap" style="left:{(i / 8 * 100).toFixed(1)}%">{label}</div>
 		{/each}
 	</div>
 
-	<div class="hg__grid" role="img" aria-label="{title} heatmap">
+	<div class="flex flex-col gap-[2px]" role="img" aria-label="{title} heatmap">
 		{#each grid() as row, dayIdx}
-			<div class="hg__row">
-				<div class="hg__row-label" aria-hidden="true">{DAY_LABELS[dayIdx]}</div>
-				<div class="hg__cells">
+			<div class="flex items-center gap-2">
+				<div class="w-[56px] shrink-0 text-[9px] text-text-muted text-right whitespace-nowrap" aria-hidden="true">{DAY_LABELS[dayIdx]}</div>
+				<div class="flex gap-[1.5px] flex-1">
 					{#each row as cell}
 						<!-- svelte-ignore a11y_no_static_element_interactions -->
 						<div
-							class="hg__cell"
+							class="flex-1 h-[14px] rounded-[2px] cursor-crosshair transition-opacity duration-100 hover:opacity-75 hover:outline hover:outline-1 hover:outline-white/40 hover:outline-offset-1 hover:rounded-[1px]"
 							style="background:{cellColor(cell.value)}"
 							onmouseenter={(e) => onEnter(e, cell.value, cell.ts)}
 							onmouseleave={onLeave}
@@ -153,141 +152,21 @@
 	</div>
 
 	<!-- Scale bar -->
-	<div class="hg__scale" aria-hidden="true">
-		<span class="hg__scale-label">{formatValue(minVal)}{unit}</span>
-		<div class="hg__scale-bar" style="background:linear-gradient(to right,{colorLow},{colorHigh})"></div>
-		<span class="hg__scale-label">{formatValue(maxVal)}{unit}</span>
+	<div class="flex items-center gap-2 pl-[64px]" aria-hidden="true">
+		<span class="text-[9px] text-text-muted whitespace-nowrap">{formatValue(minVal)}{unit}</span>
+		<div class="flex-1 h-1 rounded-[2px]" style="background:linear-gradient(to right,{colorLow},{colorHigh})"></div>
+		<span class="text-[9px] text-text-muted whitespace-nowrap">{formatValue(maxVal)}{unit}</span>
 	</div>
 </div>
 
 <!-- Floating tooltip rendered at document level -->
 {#if tipVisible}
 	<div
-		class="hg-tip"
+		class="fixed z-[9999] bg-[#0f172a]/95 border border-white/[0.14] rounded-lg px-[10px] py-[6px] pointer-events-none -translate-x-1/2 -translate-y-full"
 		style="top:{tipY - 56}px; left:{tipX}px"
 		role="tooltip"
 	>
-		<div class="hg-tip__val">{tipValue}</div>
-		<div class="hg-tip__time">{tipTime}</div>
+		<div class="text-[13px] font-bold text-text-primary font-mono">{tipValue}</div>
+		<div class="text-[10px] text-text-muted mt-[2px]">{tipTime}</div>
 	</div>
 {/if}
-
-<style>
-	.hg {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		width: 100%;
-	}
-
-	.hg__title {
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--text-secondary);
-	}
-
-	/* Column labels row */
-	.hg__col-labels {
-		position: relative;
-		height: 14px;
-		padding-left: 64px; /* match row-label width */
-	}
-
-	.hg__row-label-spacer { display: inline-block; }
-
-	.hg__col-label {
-		position: absolute;
-		font-size: 9px;
-		color: var(--text-muted);
-		transform: translateX(-50%);
-		white-space: nowrap;
-	}
-
-	/* Grid */
-	.hg__grid {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-
-	.hg__row {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-	}
-
-	.hg__row-label {
-		width: 56px;
-		flex-shrink: 0;
-		font-size: 9px;
-		color: var(--text-muted);
-		text-align: right;
-		white-space: nowrap;
-	}
-
-	.hg__cells {
-		display: flex;
-		gap: 1.5px;
-		flex: 1;
-	}
-
-	.hg__cell {
-		flex: 1;
-		height: 14px;
-		border-radius: 2px;
-		cursor: crosshair;
-		transition: opacity 0.1s;
-	}
-
-	.hg__cell:hover {
-		opacity: 0.75;
-		outline: 1px solid rgba(255, 255, 255, 0.4);
-		outline-offset: 1px;
-		border-radius: 1px;
-	}
-
-	/* Scale bar */
-	.hg__scale {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding-left: 64px;
-	}
-
-	.hg__scale-bar {
-		flex: 1;
-		height: 4px;
-		border-radius: 2px;
-	}
-
-	.hg__scale-label {
-		font-size: 9px;
-		color: var(--text-muted);
-		white-space: nowrap;
-	}
-
-	/* Floating tooltip */
-	:global(.hg-tip) {
-		position: fixed;
-		z-index: 9999;
-		background: rgba(15, 23, 42, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.14);
-		border-radius: 8px;
-		padding: 6px 10px;
-		pointer-events: none;
-		transform: translateX(-50%) translateY(-100%);
-	}
-
-	:global(.hg-tip__val) {
-		font-size: 13px;
-		font-weight: 700;
-		color: var(--text-primary);
-		font-family: 'JetBrains Mono', monospace;
-	}
-
-	:global(.hg-tip__time) {
-		font-size: 10px;
-		color: var(--text-muted);
-		margin-top: 2px;
-	}
-</style>

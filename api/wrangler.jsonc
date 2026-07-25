@@ -36,5 +36,10 @@
 	},
 	"vars": {
 		"ENVIRONMENT": "development"
+	},
+	"triggers": {
+		"crons": [
+			"* * * * *"
+		]
 	}
 }

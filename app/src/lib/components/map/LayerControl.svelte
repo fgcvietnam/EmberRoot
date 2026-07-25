@@ -14,37 +14,12 @@
 	} = $props();
 </script>
 
-<div class="layer-control">
-	<div class="layer-control__header">Map layers</div>
+<div class="bg-[#0f172a]/96 border border-[#94a3b8]/14 rounded-[18px] p-3.5 text-[#e2e8f0] text-[13px]">
+	<div class="font-bold mb-2.5">Map layers</div>
 	{#each layers as layer}
-		<label class="layer-control__row">
-			<input type="checkbox" checked={layer.enabled} on:change={() => onToggle(layer.id)} />
+		<label class="flex items-center gap-2.5 mb-2 last:mb-0 cursor-pointer">
+			<input type="checkbox" checked={layer.enabled} onchange={() => onToggle(layer.id)} />
 			<span>{layer.label}</span>
 		</label>
 	{/each}
 </div>
-
-<style>
-	.layer-control {
-		background: rgba(15, 23, 42, 0.96);
-		border: 1px solid rgba(148, 163, 184, 0.14);
-		border-radius: 18px;
-		padding: 14px;
-		color: #e2e8f0;
-		font-size: 13px;
-	}
-
-	.layer-control__header {
-		font-weight: 700;
-		margin-bottom: 10px;
-	}
-
-	.layer-control__row {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		margin-bottom: 8px;
-	}
-
-	.layer-control__row:last-child { margin-bottom: 0; }
-</style>

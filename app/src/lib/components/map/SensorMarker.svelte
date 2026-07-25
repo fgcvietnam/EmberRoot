@@ -2,39 +2,16 @@
 	import type { SensorNode } from '$lib/mock';
 
 	let { sensor, selected = false }: { sensor: SensorNode; selected?: boolean } = $props();
+
+	const statusDotColor = $derived(({
+		online: 'bg-[#22c55e]',
+		warning: 'bg-[#f59e0b]',
+		critical: 'bg-[#ef4444]',
+		offline: 'bg-[#374151]'
+	} as Record<string, string>)[sensor.status] ?? 'bg-[#374151]');
 </script>
 
-<div class="sensor-marker {selected ? 'selected' : ''}">
-	<div class="status-dot status-dot--{sensor.status}"></div>
-	<div class="sensor-label">{sensor.id.replace('SN-', '')}</div>
+<div class="flex items-center gap-2 px-2 py-1 rounded-full text-white text-[11px] font-bold shadow-[0_0_0_2px_rgba(15,23,42,0.32)] {selected ? 'bg-[#22c55e]/95' : 'bg-[#0f172a]/90'}">
+	<div class="w-2.5 h-2.5 rounded-full {statusDotColor}"></div>
+	<div>{sensor.id.replace('SN-', '')}</div>
 </div>
-
-<style>
-	.sensor-marker {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 4px 8px;
-		border-radius: 999px;
-		background: rgba(15, 23, 42, 0.9);
-		color: white;
-		font-size: 11px;
-		font-weight: 700;
-		box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.32);
-	}
-
-	.sensor-marker.selected {
-		background: rgba(34, 197, 94, 0.95);
-	}
-
-	.status-dot {
-		width: 10px;
-		height: 10px;
-		border-radius: 999px;
-	}
-
-	.status-dot--online { background: #22c55e; }
-	.status-dot--warning { background: #f59e0b; }
-	.status-dot--critical { background: #ef4444; }
-	.status-dot--offline { background: #374151; }
-</style>

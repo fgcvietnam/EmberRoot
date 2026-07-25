@@ -185,21 +185,19 @@
 		return `lac_${id.replace(/\W/g, '_')}`;
 	}
 </script>
-
-<div class="lac" bind:this={wrapEl}>
+<div class="w-full flex flex-col gap-2" bind:this={wrapEl}>
 	<!-- Legend -->
 	{#if showLegend && series.length > 1}
-		<div class="lac__legend" role="list">
+		<div class="flex flex-wrap gap-[6px] pb-2 border-b border-surface-border" role="list">
 			{#each series as s}
 				<button
-					class="lac__leg-btn"
-					class:lac__leg-btn--off={hiddenSet.has(s.id)}
+					class="inline-flex items-center gap-[5px] text-[10px] bg-transparent border-0 cursor-pointer px-[6px] py-[2px] rounded transition-colors duration-150 hover:bg-surface-raised hover:text-text-primary {hiddenSet.has(s.id) ? 'text-text-muted line-through' : 'text-text-secondary'}"
 					onclick={() => toggle(s.id)}
 					role="listitem"
 					aria-pressed={!hiddenSet.has(s.id)}
 				>
 					<span
-						class="lac__leg-swatch"
+						class="w-[18px] h-[2.5px] rounded-[2px] shrink-0"
 						style="background:{s.color};opacity:{hiddenSet.has(s.id) ? 0.22 : 1}"
 					></span>
 					{s.label}
@@ -211,7 +209,7 @@
 	<!-- SVG + tooltip wrapper -->
 	<div style="position:relative; height:{height}px; width:100%;">
 		<svg
-			class="lac__svg"
+			class="block overflow-visible"
 			viewBox="0 0 {W} {height}"
 			width={W}
 			{height}
@@ -296,7 +294,7 @@
 					stroke-dasharray="4 3"
 				/>
 				{#each hovPts as p}
-					<circle cx={p.px} cy={p.py} r="8" fill={p.color} opacity="0.15" class="lac__ring" />
+					<circle cx={p.px} cy={p.py} r="8" fill={p.color} opacity="0.15" class="transition-all duration-200 ease-out" />
 					<circle
 						cx={p.px}
 						cy={p.py}
@@ -304,7 +302,7 @@
 						fill={p.color}
 						stroke="var(--surface-base)"
 						stroke-width="1.5"
-						class="lac__dot"
+						class="transition-all duration-150 ease-out"
 					/>
 				{/each}
 			{/if}
@@ -330,81 +328,3 @@
 		/>
 	</div>
 </div>
-
-<style>
-	.lac {
-		width: 100%;
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	/* Legend */
-	.lac__legend {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 6px;
-		padding-bottom: 8px;
-		border-bottom: 1px solid var(--surface-border);
-	}
-	.lac__leg-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		font-size: 10px;
-		color: var(--text-secondary);
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		padding: 2px 6px;
-		border-radius: 4px;
-		transition:
-			background var(--transition-fast),
-			color var(--transition-fast);
-	}
-	.lac__leg-btn:hover {
-		background: var(--surface-raised);
-		color: var(--text-primary);
-	}
-	.lac__leg-btn--off {
-		color: var(--text-muted);
-		text-decoration: line-through;
-	}
-	.lac__leg-swatch {
-		width: 18px;
-		height: 2.5px;
-		border-radius: 2px;
-		flex-shrink: 0;
-	}
-
-	.lac__svg {
-		display: block;
-		overflow: visible;
-	}
-
-	/* Animated hover indicators */
-	:global(.lac__ring) {
-		animation: lac-ring 250ms ease-out forwards;
-	}
-	:global(.lac__dot) {
-		animation: lac-dot 200ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-	}
-	@keyframes lac-ring {
-		from {
-			r: 2;
-			opacity: 0;
-		}
-		to {
-			r: 8;
-			opacity: 0.15;
-		}
-	}
-	@keyframes lac-dot {
-		from {
-			r: 1;
-		}
-		to {
-			r: 4;
-		}
-	}
-</style>

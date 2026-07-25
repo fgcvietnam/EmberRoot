@@ -23,30 +23,32 @@
 	let selected = $state<BarDef | null>(null);
 </script>
 
-<div class="aa">
-	<div class="aa__header">
-		<div class="aa__title-block">
-			<div class="aa__title-row">
+
+
+<div class="flex flex-col gap-[14px] h-full">
+	<div class="flex items-start justify-between">
+		<div class="flex flex-col gap-[3px]">
+			<div class="flex items-center gap-[6px]">
 				{#if critical > 0}<StatusIndicator status="critical" pulse size="md" />{/if}
-				<span class="aa__title">Active Alerts</span>
+				<span class="text-[12px] font-semibold tracking-[0.06em] uppercase text-text-primary">Active Alerts</span>
 			</div>
-			<span class="aa__subtitle">Unacknowledged: {unack}</span>
+			<span class="text-[10px] text-text-muted">Unacknowledged: {unack}</span>
 		</div>
-		<span class="aa__total">{alerts.length}</span>
+		<span class="font-mono text-[44px] font-extrabold leading-none tracking-[-2px] text-text-primary">{alerts.length}</span>
 	</div>
 
 	<BarChart {bars} orientation="horizontal" showValues
 		onBarClick={(b) => selected = selected?.id === b.id ? null : b} />
 
 	{#if selected}
-		<div class="aa__detail">
-			<span class="aa__detail-label">{selected.label} alerts</span>
-			<span class="aa__detail-count" style="color:{selected.color}">{selected.value}</span>
+		<div class="flex items-center justify-between px-[10px] py-[7px] rounded-md bg-surface-raised border border-surface-border text-[11px]">
+			<span class="text-text-secondary">{selected.label} alerts</span>
+			<span class="font-mono text-[18px] font-bold" style="color:{selected.color}">{selected.value}</span>
 		</div>
 	{/if}
 
-	<div class="aa__footer">
-		<a href="/alert-history" class="aa__link">
+	<div class="flex items-center justify-between mt-auto">
+		<a href="/alert-history" class="inline-flex items-center gap-1 text-[11px] text-ember-300 no-underline font-medium transition-colors duration-150 hover:text-ember-200">
 			View all
 			<svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -55,37 +57,3 @@
 		{#if critical > 0}<Badge variant="critical">{critical} critical</Badge>{/if}
 	</div>
 </div>
-
-<style>
-	.aa { display: flex; flex-direction: column; gap: 14px; height: 100%; }
-	.aa__header { display: flex; align-items: flex-start; justify-content: space-between; }
-	.aa__title-block { display: flex; flex-direction: column; gap: 3px; }
-	.aa__title-row { display: flex; align-items: center; gap: 6px; }
-	.aa__title {
-		font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
-		text-transform: uppercase; color: var(--text-primary);
-	}
-	.aa__subtitle { font-size: 10px; color: var(--text-muted); }
-	.aa__total {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 44px; font-weight: 800; line-height: 1; letter-spacing: -2px;
-		color: var(--text-primary);
-	}
-	.aa__detail {
-		display: flex; align-items: center; justify-content: space-between;
-		padding: 7px 10px; border-radius: 6px;
-		background: var(--surface-raised); border: 1px solid var(--surface-border);
-		font-size: 11px;
-	}
-	.aa__detail-label { color: var(--text-secondary); }
-	.aa__detail-count {
-		font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700;
-	}
-	.aa__footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-	.aa__link {
-		display: inline-flex; align-items: center; gap: 4px;
-		font-size: 11px; color: var(--ember-300); text-decoration: none; font-weight: 500;
-		transition: color var(--transition-fast);
-	}
-	.aa__link:hover { color: var(--ember-200); }
-</style>

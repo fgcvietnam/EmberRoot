@@ -16,7 +16,7 @@
 		onSelect?: (item: SearchResult) => void;
 	} = $props();
 
-	let query = '';
+	let query = $state('');
 
 	function runSearch() {
 		onSearch?.(query);
@@ -27,90 +27,28 @@
 	}
 </script>
 
-<div class="search-panel">
-	<div class="search-panel__top">
+<div class="bg-[#0f172a]/90 border border-[#94a3b8]/14 rounded-[18px] p-3.5 text-[#e2e8f0]">
+	<div class="flex gap-2.5 mb-3">
 		<input
 			type="search"
 			placeholder="Search node ID, region, coordinates..."
 			bind:value={query}
 			onkeydown={(event) => event.key === 'Enter' && runSearch()}
-			class="search-panel__input"
+			class="flex-1 px-3 py-2 rounded-[14px] border border-[#94a3b8]/18 bg-white/[0.04] text-[#e2e8f0] outline-none"
 		/>
-		<button type="button" class="search-panel__button" onclick={runSearch}>
+		<button type="button" class="border-0 px-3.5 py-2 rounded-[14px] bg-[#7c3aed] text-white font-bold cursor-pointer" onclick={runSearch}>
 			Search
 		</button>
 	</div>
 
-	<ul class="search-panel__results">
+	<ul class="list-none p-0 m-0 grid gap-2">
 		{#each results as item}
-			<li class="search-panel__item" onclick={() => selectItem(item)}>
-				<div class="search-panel__item-title">{item.title}</div>
-				<div class="search-panel__item-subtitle">{item.details}</div>
+			<li>
+				<button type="button" class="w-full text-left px-3 py-2.5 rounded-[14px] bg-white/[0.05] cursor-pointer hover:bg-white/10" onclick={() => selectItem(item)}>
+					<div class="font-bold">{item.title}</div>
+					<div class="text-xs text-[#e2e8f0]/72">{item.details}</div>
+				</button>
 			</li>
 		{/each}
 	</ul>
 </div>
-
-<style>
-	.search-panel {
-		background: rgba(15, 23, 42, 0.9);
-		border: 1px solid rgba(148, 163, 184, 0.14);
-		border-radius: 18px;
-		padding: 14px;
-		color: #e2e8f0;
-	}
-
-	.search-panel__top {
-		display: flex;
-		gap: 10px;
-		margin-bottom: 12px;
-	}
-
-	.search-panel__input {
-		flex: 1;
-		padding: 8px 12px;
-		border-radius: 14px;
-		border: 1px solid rgba(148, 163, 184, 0.18);
-		background: rgba(255, 255, 255, 0.04);
-		color: #e2e8f0;
-		outline: none;
-	}
-
-	.search-panel__button {
-		border: none;
-		padding: 8px 14px;
-		border-radius: 14px;
-		background: #7c3aed;
-		color: white;
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.search-panel__results {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		gap: 8px;
-	}
-
-	.search-panel__item {
-		padding: 10px 12px;
-		border-radius: 14px;
-		background: rgba(255, 255, 255, 0.05);
-		cursor: pointer;
-	}
-
-	.search-panel__item:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	.search-panel__item-title {
-		font-weight: 700;
-	}
-
-	.search-panel__item-subtitle {
-		font-size: 12px;
-		color: rgba(226, 232, 240, 0.72);
-	}
-</style>

@@ -3,15 +3,8 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 export default {
     preprocess: vitePreprocess(),
-
     compilerOptions: {
-        runes: ({ filename }) =>
-            filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+        runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
     },
-
-    kit: {
-        adapter: adapter({
-            fallback: 'index.html'
-        })
-    }
+    kit: { adapter: adapter({ fallback: 'index.html' }) }
 };

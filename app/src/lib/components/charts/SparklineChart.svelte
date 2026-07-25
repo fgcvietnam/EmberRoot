@@ -78,11 +78,10 @@
 	// Stable gradient ID derived from color string characters
 	const gid = $derived('sl_' + color.replace(/\W/g,'').slice(0,10));
 </script>
-
-<div class="sl" bind:this={wrapEl} style="position:relative; height:{height}px">
+<div class="w-full overflow-visible relative" bind:this={wrapEl} style="height:{height}px">
 	{#if data.length >= 2}
 		<svg
-			class="sl__svg"
+			class="block overflow-visible"
 			viewBox="0 0 {W} {H}"
 			width={W} height={H}
 			onmousemove={onMove}
@@ -122,8 +121,3 @@
 		/>
 	{/if}
 </div>
-
-<style>
-	.sl { width: 100%; overflow: visible; }
-	.sl__svg { display: block; overflow: visible; }
-</style>

@@ -21,91 +21,23 @@
 		children,
 		...restProps
 	}: Props = $props();
+
+	const sizeStyles: Record<string, string> = {
+		sm: 'h-[28px] px-[10px] text-[11px]',
+		md: 'h-[36px] px-[14px] text-[13px]',
+		lg: 'h-[44px] px-[20px] text-[14px]'
+	};
+	const variantStyles: Record<string, string> = {
+		primary: 'bg-ember-500 text-card border-ember-400 [box-shadow:var(--glow-ember)] hover:enabled:bg-ember-400 hover:enabled:[box-shadow:0_0_28px_-4px_rgba(240,120,64,0.5)]',
+		secondary: 'bg-surface-raised text-text-primary border-surface-border hover:enabled:bg-surface-overlay hover:enabled:border-surface-muted',
+		danger: 'bg-status-critical text-card border-[#f06868] [box-shadow:0_0_16px_-4px_rgba(240,80,80,0.35)] hover:enabled:bg-[#f36868] hover:enabled:[box-shadow:0_0_24px_-4px_rgba(240,80,80,0.55)]',
+		ghost: 'bg-transparent text-text-secondary border-transparent hover:enabled:bg-surface-raised hover:enabled:text-text-primary'
+	};
 </script>
 
 <button
-	class="er-btn er-btn--{variant} er-btn--{size} {className}"
+	class="inline-flex items-center justify-center gap-[6px] font-medium tracking-[0.01em] border border-transparent rounded-[6px] cursor-pointer transition-colors transition-shadow duration-150 whitespace-nowrap select-none focus-visible:outline-2 focus-visible:outline-ember-400 focus-visible:outline-offset-2 disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none {sizeStyles[size]} {variantStyles[variant]} {className}"
 	{...restProps}
 >
 	{@render children?.()}
 </button>
-
-<style>
-	.er-btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		font-family: inherit;
-		font-weight: 500;
-		letter-spacing: 0.01em;
-		border: 1px solid transparent;
-		border-radius: 6px;
-		cursor: pointer;
-		transition: background var(--transition-fast), border-color var(--transition-fast),
-			color var(--transition-fast), box-shadow var(--transition-fast);
-		white-space: nowrap;
-		text-decoration: none;
-		-webkit-user-select: none;
-		user-select: none;
-	}
-
-	.er-btn:focus-visible {
-		outline: 2px solid var(--ember-400);
-		outline-offset: 2px;
-	}
-
-	.er-btn:disabled {
-		opacity: 0.45;
-		cursor: not-allowed;
-		pointer-events: none;
-	}
-
-	/* ── Sizes ── */
-	.er-btn--sm { height: 28px; padding: 0 10px; font-size: 11px; }
-	.er-btn--md { height: 36px; padding: 0 14px; font-size: 13px; }
-	.er-btn--lg { height: 44px; padding: 0 20px; font-size: 14px; }
-
-	/* ── Variants ── */
-	.er-btn--primary {
-		background: var(--ember-500);
-		color: #fff;
-		border-color: var(--ember-400);
-		box-shadow: var(--glow-ember);
-	}
-	.er-btn--primary:hover:not(:disabled) {
-		background: var(--ember-400);
-		box-shadow: 0 0 28px -4px rgba(240, 120, 64, 0.5);
-	}
-
-	.er-btn--secondary {
-		background: var(--surface-raised);
-		color: var(--text-primary);
-		border-color: var(--surface-border);
-	}
-	.er-btn--secondary:hover:not(:disabled) {
-		background: var(--surface-overlay);
-		border-color: var(--surface-muted);
-	}
-
-	.er-btn--danger {
-		background: var(--status-critical);
-		color: #fff;
-		border-color: #f06868;
-		box-shadow: 0 0 16px -4px rgba(240, 80, 80, 0.35);
-	}
-	.er-btn--danger:hover:not(:disabled) {
-		background: #f36868;
-		box-shadow: 0 0 24px -4px rgba(240, 80, 80, 0.55);
-	}
-
-	.er-btn--ghost {
-		background: transparent;
-		color: var(--text-secondary);
-		border-color: transparent;
-	}
-	.er-btn--ghost:hover:not(:disabled) {
-		background: var(--surface-raised);
-		color: var(--text-primary);
-	}
-</style>

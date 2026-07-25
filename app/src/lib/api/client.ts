@@ -1,7 +1,8 @@
 import type { ApiAlert, ApiEnvelope, ApiNode, ApiRegion, ApiTelemetry, AuthSession, RealtimeEvent } from './types';
+import { PUBLIC_API_BASE_URL } from '$env/static/public';
 
 const TOKEN_KEY = 'emberroot.admin-token';
-const API_BASE_URL = (import.meta.env.PUBLIC_API_BASE_URL as string | undefined)?.replace(/\/$/u, '') || 'http://localhost:8787';
+const API_BASE_URL = PUBLIC_API_BASE_URL.replace(/\/$/u, '');
 
 export class EmberRootApiClient {
 	private token: string | null = typeof localStorage === 'undefined' ? null : localStorage.getItem(TOKEN_KEY);
@@ -31,6 +32,10 @@ export class EmberRootApiClient {
 		localStorage.removeItem(TOKEN_KEY);
 	}
 
+	hasSession(): boolean {
+		return Boolean(this.token);
+	}
+
 	getRegions(): Promise<ApiRegion[]> { return this.request('/api/regions'); }
 	getNodes(regionId?: string): Promise<ApiNode[]> {
 		return this.request(`/api/nodes${regionId ? `?regionId=${encodeURIComponent(regionId)}` : ''}`);
@@ -44,6 +49,16 @@ export class EmberRootApiClient {
 	}
 	acknowledgeAlert(id: string): Promise<{ id: string; state: string }> {
 		return this.request(`/api/alerts/${encodeURIComponent(id)}/acknowledge`, { method: 'POST' });
+	}
+	createNode(input: {
+		id: string;
+		name: string;
+		regionId: string;
+		nodeType?: 'full' | 'light' | 'fence';
+		latitude?: number;
+		longitude?: number;
+	}): Promise<{ id: string }> {
+		return this.request('/api/admin/nodes', { method: 'POST', body: JSON.stringify(input) });
 	}
 
 	connectRealtime(onEvent: (event: RealtimeEvent) => void, onError?: () => void): (() => void) | null {

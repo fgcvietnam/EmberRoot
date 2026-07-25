@@ -21,54 +21,20 @@
 		children,
 		...restProps
 	}: Props = $props();
+
+	const sizeStyles: Record<string, string> = {
+		sm: 'text-[9px] px-[7px] py-[2px]',
+		md: 'text-[10px] px-[9px] py-[3px]'
+	};
+	const variantStyles: Record<string, string> = {
+		neutral: 'bg-surface-overlay text-text-secondary border-surface-muted',
+		online: 'bg-[rgba(34,211,160,0.12)] text-status-online border-[rgba(34,211,160,0.3)]',
+		warning: 'bg-[rgba(240,179,64,0.12)] text-status-warning border-[rgba(240,179,64,0.3)]',
+		critical: 'bg-[rgba(240,80,80,0.12)] text-status-critical border-[rgba(240,80,80,0.3)]',
+		ember: 'bg-[rgba(240,120,64,0.15)] text-ember-300 border-ember-500'
+	};
 </script>
 
-<span class="er-badge er-badge--{variant} er-badge--{size} {className}" {...restProps}>
+<span class="inline-flex items-center gap-1 font-semibold tracking-[0.06em] uppercase rounded-full border leading-none whitespace-nowrap {sizeStyles[size]} {variantStyles[variant]} {className}" {...restProps}>
 	{@render children?.()}
 </span>
-
-<style>
-	.er-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 4px;
-		font-weight: 600;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
-		border-radius: 999px;
-		border: 1px solid;
-		line-height: 1;
-		white-space: nowrap;
-	}
-
-	/* ── Sizes ── */
-	.er-badge--sm { font-size: 9px;  padding: 2px 7px; }
-	.er-badge--md { font-size: 10px; padding: 3px 9px; }
-
-	/* ── Variants ── */
-	.er-badge--neutral {
-		background: var(--surface-overlay);
-		color: var(--text-secondary);
-		border-color: var(--surface-muted);
-	}
-	.er-badge--online {
-		background: rgba(34, 211, 160, 0.12);
-		color: var(--status-online);
-		border-color: rgba(34, 211, 160, 0.3);
-	}
-	.er-badge--warning {
-		background: rgba(240, 179, 64, 0.12);
-		color: var(--status-warning);
-		border-color: rgba(240, 179, 64, 0.3);
-	}
-	.er-badge--critical {
-		background: rgba(240, 80, 80, 0.12);
-		color: var(--status-critical);
-		border-color: rgba(240, 80, 80, 0.3);
-	}
-	.er-badge--ember {
-		background: rgba(240, 120, 64, 0.15);
-		color: var(--ember-300);
-		border-color: var(--ember-500);
-	}
-</style>

@@ -35,88 +35,28 @@
 	};
 </script>
 
-<Card padding="md" class="er-chart {className}">
-	<div class="er-chart__header">
-		<div class="er-chart__titles">
-			<h3 class="er-chart__title">{title}</h3>
+<Card padding="md" class="flex flex-col {className}">
+	<div class="flex items-start justify-between mb-4 gap-3">
+		<div class="flex flex-col gap-[2px]">
+			<h3 class="text-xs font-semibold tracking-[0.07em] uppercase text-text-primary m-0">{title}</h3>
 			{#if subtitle}
-				<p class="er-chart__subtitle">{subtitle}</p>
+				<p class="text-[11px] text-text-muted">{subtitle}</p>
 			{/if}
 		</div>
 		{#if toolbar}
-			<div class="er-chart__toolbar">{@render toolbar()}</div>
+			<div class="flex items-center gap-[6px] shrink-0">{@render toolbar()}</div>
 		{/if}
 	</div>
 
 	{#if aspectRatio !== 'auto'}
-		<div class="er-chart__ratio-wrapper" style="padding-top: {ratios[aspectRatio]}">
-			<div class="er-chart__ratio-inner">
+		<div class="relative w-full" style="padding-top: {ratios[aspectRatio]}">
+			<div class="absolute inset-0 flex">
 				{@render children?.()}
 			</div>
 		</div>
 	{:else}
-		<div class="er-chart__body" style="min-height: {minHeight}">
+		<div class="flex-1 relative flex" style="min-height: {minHeight}">
 			{@render children?.()}
 		</div>
 	{/if}
 </Card>
-
-<style>
-	:global(.er-chart) {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.er-chart__header {
-		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		margin-bottom: 16px;
-		gap: 12px;
-	}
-
-	.er-chart__titles {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-
-	.er-chart__title {
-		font-size: 12px;
-		font-weight: 600;
-		letter-spacing: 0.07em;
-		text-transform: uppercase;
-		color: var(--text-primary);
-		margin: 0;
-	}
-
-	.er-chart__subtitle {
-		font-size: 11px;
-		color: var(--text-muted);
-	}
-
-	.er-chart__toolbar {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		flex-shrink: 0;
-	}
-
-	/* Fixed aspect ratio approach */
-	.er-chart__ratio-wrapper {
-		position: relative;
-		width: 100%;
-	}
-	.er-chart__ratio-inner {
-		position: absolute;
-		inset: 0;
-		display: flex;
-	}
-
-	/* Auto height */
-	.er-chart__body {
-		flex: 1;
-		position: relative;
-		display: flex;
-	}
-</style>

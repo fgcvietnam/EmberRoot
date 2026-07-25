@@ -55,7 +55,7 @@
 	}
 </script>
 
-<div class="dc" bind:this={wrapEl} style="position:relative; width:{size}px; height:{size}px; flex-shrink:0">
+<div class="relative shrink-0" bind:this={wrapEl} style="width:{size}px; height:{size}px;">
 	<svg width={size} height={size} viewBox="0 0 {size} {size}"
 		style="transform:rotate(-90deg)"
 		role="img" aria-label="Donut chart">
@@ -93,9 +93,9 @@
 	</svg>
 
 	<!-- Center (counter-rotate to cancel SVG rotation) -->
-	<div class="dc__center" style="width:{size}px; height:{size}px">
-		{#if centerLabel}<span class="dc__val">{centerLabel}</span>{/if}
-		{#if centerSub}<span class="dc__sub">{centerSub}</span>{/if}
+	<div class="absolute inset-0 flex flex-col items-center justify-center gap-[2px] pointer-events-none" style="width:{size}px; height:{size}px">
+		{#if centerLabel}<span class="font-mono text-[17px] font-bold text-text-primary leading-none">{centerLabel}</span>{/if}
+		{#if centerSub}<span class="text-[8px] text-text-muted uppercase tracking-[0.04em]">{centerSub}</span>{/if}
 	</div>
 
 	<ChartTooltip
@@ -106,21 +106,3 @@
 		align={tipX > size * 0.6 ? 'right' : 'left'}
 	/>
 </div>
-
-<style>
-	.dc { position: relative; }
-	.dc__center {
-		position: absolute; inset: 0;
-		display: flex; flex-direction: column;
-		align-items: center; justify-content: center;
-		gap: 2px; pointer-events: none;
-	}
-	.dc__val {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 17px; font-weight: 700; color: var(--text-primary); line-height: 1;
-	}
-	.dc__sub {
-		font-size: 8px; color: var(--text-muted);
-		text-transform: uppercase; letter-spacing: 0.04em;
-	}
-</style>

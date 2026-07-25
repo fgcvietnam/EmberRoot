@@ -133,7 +133,7 @@ app.post('/api/ingest/telemetry', async (c) => {
 	if (!isAdmin && !ingestKeyMatches(apiKey, c.env)) return c.json(jsonError('Valid ingest credentials are required', 401), 401);
 	const body = await parseJson(c.req.raw);
 	const telemetry = parseTelemetryPayload(body);
-	if (!telemetry) return c.json(jsonError('Invalid telemetry payload. Include node_id and at least one numeric measurement.'));
+	if (!telemetry) return c.json(jsonError('Invalid telemetry payload. Include node_id and at least one numeric measurement.', 400), 400);
 	const result = await ingestTelemetry(c.env, telemetry, 'http');
 	return c.json({ success: true, data: result }, 201);
 });
@@ -142,7 +142,7 @@ app.post('/api/ingest/mqtt', async (c) => {
 	if (!ingestKeyMatches(c.req.header('X-API-Key'), c.env)) return c.json(jsonError('Valid ingest key is required', 401), 401);
 	const body = await parseJson(c.req.raw);
 	const telemetry = parseTelemetryPayload(body);
-	if (!telemetry) return c.json(jsonError('Invalid MQTT telemetry payload.'));
+	if (!telemetry) return c.json(jsonError('Invalid MQTT telemetry payload.', 400), 400);
 	const result = await ingestTelemetry(c.env, telemetry, 'mqtt');
 	return c.json({ success: true, data: result }, 201);
 });
@@ -162,7 +162,7 @@ app.get('/api/admin/nodes', requireAdmin, async (c) => {
 app.post('/api/admin/nodes', requireAdmin, async (c) => {
 	const body = await parseJson(c.req.raw);
 	if (!body || typeof body.id !== 'string' || typeof body.name !== 'string' || typeof body.regionId !== 'string') {
-		return c.json(jsonError('id, name, and regionId are required.'));
+		return c.json(jsonError('id, name, and regionId are required.', 400), 400);
 	}
 	const nodeType = body.nodeType === 'light' || body.nodeType === 'fence' ? body.nodeType : 'full';
 	await c.env.DB.prepare(
@@ -177,4 +177,12 @@ app.post('/api/admin/nodes', requireAdmin, async (c) => {
 app.notFound((c) => c.json(jsonError('Route not found', 404), 404));
 
 export { RealtimeHub };
-export default app;
+export default {
+	fetch: app.fetch,
+	async scheduled(event: unknown, env: Bindings, ctx: unknown) {
+		const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+		await env.DB.prepare(
+			"UPDATE nodes SET status = 'offline' WHERE status != 'offline' AND (last_seen_at IS NULL OR last_seen_at < ?)"
+		).bind(fiveMinutesAgo).run();
+	}
+};

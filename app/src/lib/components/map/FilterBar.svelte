@@ -33,70 +33,18 @@
 	}
 </script>
 
-<div class="filter-bar" role="group" aria-label="Filter nodes by status">
+<div class="flex gap-[6px] flex-wrap bg-[#0f172a]/82 border border-white/10 rounded-[14px] px-[10px] py-2 backdrop-blur-[8px]" role="group" aria-label="Filter nodes by status">
 	{#each FILTERS as f}
 		<button
-			class="filter-chip"
-			class:filter-chip--active={active === f.id}
+			class="inline-flex items-center gap-[5px] px-[12px] py-[5px] rounded-lg border bg-transparent text-[11px] font-semibold tracking-[0.04em] cursor-pointer transition-[background-color,color,border-color] duration-150 ease-in-out hover:bg-white/[0.06] hover:text-text-secondary {active === f.id ? '' : 'border-transparent text-text-muted'}"
 			onclick={() => select(f.id)}
-			style="--chip-color:{f.color}"
+			style="--chip-color:{f.color}; {active === f.id ? 'background: color-mix(in srgb, var(--chip-color) 15%, transparent); border-color: color-mix(in srgb, var(--chip-color) 40%, transparent); color: var(--chip-color);' : ''}"
 			aria-pressed={active === f.id}
 		>
 			{#if f.id !== null}
-				<span class="filter-chip__dot"></span>
+				<span class="w-1.5 h-1.5 rounded-full shrink-0" style="background: {f.color}"></span>
 			{/if}
 			{f.label}
 		</button>
 	{/each}
 </div>
-
-<style>
-	.filter-bar {
-		display: flex;
-		gap: 6px;
-		flex-wrap: wrap;
-		background: rgba(15, 23, 42, 0.82);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 14px;
-		padding: 8px 10px;
-		backdrop-filter: blur(8px);
-	}
-
-	.filter-chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 5px;
-		padding: 5px 12px;
-		border-radius: 8px;
-		border: 1px solid transparent;
-		background: transparent;
-		color: var(--text-muted);
-		font-size: 11px;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-		cursor: pointer;
-		transition:
-			background 0.15s ease,
-			color 0.15s ease,
-			border-color 0.15s ease;
-	}
-
-	.filter-chip:hover {
-		background: rgba(255, 255, 255, 0.06);
-		color: var(--text-secondary);
-	}
-
-	.filter-chip--active {
-		background: color-mix(in srgb, var(--chip-color) 15%, transparent);
-		border-color: color-mix(in srgb, var(--chip-color) 40%, transparent);
-		color: var(--chip-color);
-	}
-
-	.filter-chip__dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 50%;
-		background: var(--chip-color);
-		flex-shrink: 0;
-	}
-</style>

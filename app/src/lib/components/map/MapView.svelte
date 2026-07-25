@@ -381,21 +381,21 @@
 	}
 </script>
 
-<div style="position: relative; width: 100%; height: 100%;">
-	<div id="emberroot-map" class="map-view"></div>
+<div class="relative w-full h-full">
+	<div id="emberroot-map" class="w-full h-full rounded-[20px] overflow-hidden"></div>
 	{#if activeLayers.firmsHotspots}
-		<div class="firms-metadata">
-			<div style="display: flex; gap: 6px;">
+		<div class="absolute bottom-3 right-3 bg-[#0f172a]/85 border border-white/14 rounded-md px-2.5 py-1.5 font-mono text-[11px] text-[#e2e8f0] z-[1000] flex flex-col backdrop-blur-[4px] shadow-[0_4px_12px_rgba(0,0,0,0.35)] pointer-events-auto">
+			<div class="flex gap-1.5">
 				<span>FIRMS Layer Status:</span>
 				{#if firmsLastUpdated}
-					<span style="color: var(--status-online);">Updated {firmsLastUpdated.toLocaleTimeString()}</span>
+					<span class="text-status-online">Updated {firmsLastUpdated.toLocaleTimeString()}</span>
 				{:else}
-					<span style="color: var(--status-warning);">Syncing...</span>
+					<span class="text-status-warning">Syncing...</span>
 				{/if}
 			</div>
 			
-			<div style="margin-top: 4px; border-top: 1px solid var(--surface-border); padding-top: 4px;">
-				<label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+			<div class="mt-1 border-t border-surface-border pt-1">
+				<label class="flex items-center gap-1.5 cursor-pointer">
 					<input type="checkbox" bind:checked={testFirmsMode} onchange={async () => {
 						if (map && hotspotLayer && map.hasLayer(hotspotLayer)) {
 							map.removeLayer(hotspotLayer);
@@ -406,7 +406,7 @@
 							map.addLayer(hotspotLayer);
 						}
 					}} />
-					<span style="font-size: 11px;">Test Mode (Fetch African Region)</span>
+					<span class="text-[11px]">Test Mode (Fetch African Region)</span>
 				</label>
 			</div>
 		</div>
@@ -414,13 +414,6 @@
 </div>
 
 <style>
-	.map-view {
-		width: 100%;
-		height: 100%;
-		border-radius: 20px;
-		overflow: hidden;
-	}
-
 	/*
 	 * Permanent node-label tooltips.
 	 * These are Leaflet-managed tooltip elements — positioned by Leaflet's own
@@ -443,24 +436,5 @@
 	/* Hide the default Leaflet tooltip arrow for permanent labels */
 	:global(.er-node-label::before) {
 		display: none;
-	}
-
-	.firms-metadata {
-		position: absolute;
-		bottom: 12px;
-		right: 12px;
-		background: rgba(15, 23, 42, 0.85);
-		border: 1px solid rgba(255, 255, 255, 0.14);
-		border-radius: 6px;
-		padding: 6px 10px;
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 11px;
-		color: #e2e8f0;
-		z-index: 1000;
-		display: flex;
-		flex-direction: column;
-		backdrop-filter: blur(4px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-		pointer-events: auto;
 	}
 </style>
